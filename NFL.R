@@ -17,13 +17,9 @@ source_url("https://raw.githubusercontent.com/asonty/ngs_highlights/master/utils
 ### fetch tracking data for play 242
 #play_data <- fetch_play_data(playKey_ = 242)
 
-
 #### Read in a team file
-library(readr)
 MIA_plays <- read_csv("Documents/GitHub/APM-Term-Project/additional_data/team_plays/MIA_plays.csv", col_types = cols(X1 = col_skip()))
 head(MIA_plays)
-# rename column
-names(MIA_plays)[names(MIA_plays) == "frameId"] <- "frame"
 colnames(MIA_plays)
 
 ### pick a play to visualize
@@ -45,7 +41,7 @@ first_frame
 final_frame
 
 # plot play frame plot
-plot_play_frame(play_data_ = play_data, frame_ = 11)
+plot_play_frame(play_data_ = play_data, frame_ = first_frame)
 
 # plot play frame plot with velocity vectors
 plot_play_frame(play_data_ = play_data, frame_ = 50, velocities_ = T)
@@ -203,3 +199,4 @@ play_anim <- animate(
 )
 
 play_anim
+
