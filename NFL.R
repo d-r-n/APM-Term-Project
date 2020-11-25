@@ -20,15 +20,14 @@ source_url("https://raw.githubusercontent.com/asonty/ngs_highlights/master/utils
 
 #### Read in a team file
 library(readr)
-MIA_plays <- read_csv("Documents/GitHub/APM-Term-Project/nfl-big-data-bowl-2021/team_plays/MIA_plays.csv", 
-                      col_types = cols(X1 = col_skip()))
+MIA_plays <- read_csv("Documents/GitHub/APM-Term-Project/additional_data/team_plays/MIA_plays.csv", col_types = cols(X1 = col_skip()))
 head(MIA_plays)
 # rename column
 names(MIA_plays)[names(MIA_plays) == "frameId"] <- "frame"
 colnames(MIA_plays)
 
 ### pick a play to visualize
-play_data <- filter(MIA_plays, playId == "4172") #BAL 4347 (a lot of laterals)
+play_data <- filter(MIA_plays, gameId =="2018120906", playId == "4172") #BAL 4347 (a lot of laterals)
 
 first_frame <- play_data %>%
   filter(event == "ball_snap") %>% 

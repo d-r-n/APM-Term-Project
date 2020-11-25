@@ -19,9 +19,10 @@ library(readr)
 source_url("https://raw.githubusercontent.com/asonty/ngs_highlights/master/utils/scripts/data_utils.R")
 source_url("https://raw.githubusercontent.com/asonty/ngs_highlights/master/utils/scripts/plot_utils.R")
 
-MIA_plays <- read_csv("nfl-big-data-bowl-2021/team_plays/MIA_plays.csv", 
-                      col_types = cols(X1 = col_skip()))
+#### Read in a team file
+MIA_plays <- read_csv("Documents/GitHub/APM-Term-Project/additional_data/team_plays/MIA_plays.csv", col_types = cols(X1 = col_skip()))
 head(MIA_plays)
+
 ```
 
 ## R Markdown
@@ -42,7 +43,7 @@ You can also embed plots, for example:
 
 ```{r echo=FALSE}
 ### pick a play to visualize
-play_data <- filter(MIA_plays, playId == "4172") #BAL 4347 (a lot of laterals)
+play_data <- filter(MIA_plays, gameId =="2018120906", playId == "4172") #BAL 4347 (a lot of laterals)
 
 first_frame <- play_data %>%
   filter(event == "ball_snap") %>% 
