@@ -49,7 +49,7 @@ for (i in myfiles){
       player_data <- df %>% 
         filter(between(frame, first_frame, final_frame)) %>% 
         select(gameId, playId, frame, homeTeamFlag, nflId, teamAbbr, displayName, jerseyNumber, position, positionGroup,
-               x, y, s, o, dir, event) %>% 
+               x, y, s, o, a, dir, event) %>% 
         filter(displayName != "Football")
       
       
@@ -73,4 +73,5 @@ for (i in myfiles){
   
 }  
   
-write.csv(velocities, "/Users/alexmcgraw/Documents/Adv_Predictive_Modeling/Final_Presentation/velocities/velocity_calcs.csv", col.names = TRUE)
+write.csv(velocities, "/Users/alexmcgraw/Documents/Adv_Predictive_Modeling/Final_Presentation/velocities/velocity_calcs_new.csv", col.names = TRUE)
+
