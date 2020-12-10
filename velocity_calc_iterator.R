@@ -13,7 +13,7 @@ myfiles <- lapply(files, function(i){
   read.csv(i, header=TRUE)
 })
 
-velocities <- setNames(data.frame(matrix(ncol=11, nrow=0)), c("gameId", "playId", "nflId", "position", "frame", "a", "o", "x", "y", "v_x", "v_y"))
+velocities <- setNames(data.frame(matrix(ncol=15, nrow=0)), c("gameId", "playId", "nflId", "position", "frame", "x", "y", "s", "o", "a", "dir", "dis", "event", "v_x", "v_y"))
 
 #unique_games <- ARI_plays %>% unique(c=("gameId"))
 
@@ -49,7 +49,7 @@ for (i in myfiles){
       player_data <- df %>% 
         filter(between(frame, first_frame, final_frame)) %>% 
         select(gameId, playId, frame, homeTeamFlag, nflId, teamAbbr, displayName, jerseyNumber, position, positionGroup,
-               x, y, s, o, a, dir, event) %>% 
+               x, y, s, o, a, dir, dis, event) %>% 
         filter(displayName != "Football")
       
       
@@ -62,7 +62,7 @@ for (i in myfiles){
       
       # adding data to "velocities" dataframe
       #vector <- c(player_data$nflId, player_data$v_x, player_data$v_y)
-      velocities1 <- player_data[,c("gameId", "playId", "nflId", "position", "frame", "a", "o", "x", "y", "v_x", "v_y")]
+      velocities1 <- player_data[,c("gameId", "playId", "nflId", "position", "frame", "x", "y", "s", "o", "a", "dir", "dis", "event", "v_x", "v_y")]
       
       velocities <- rbind(velocities, velocities1)
       
@@ -73,5 +73,5 @@ for (i in myfiles){
   
 }  
   
-write.csv(velocities, "/Users/alexmcgraw/Documents/Adv_Predictive_Modeling/Final_Presentation/velocities/velocity_calcs_new.csv", col.names = TRUE)
+write.csv(velocities, "/Users/alexmcgraw/Documents/Adv_Predictive_Modeling/Final_Presentation/velocities/velocity_calcs_pls_final.csv", col.names = TRUE)
 
