@@ -4,7 +4,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 
 # Read in data, getting rid of na pass results and pass results that are 'R'
-plays = pd.read_csv('./nfl-big-data-bowl-2021/plays.csv')
+plays = pd.read_csv('plays.csv')
 plays = plays[plays['passResult'].notna()]
 plays = plays[plays['passResult'] != 'R']
 
@@ -37,7 +37,7 @@ team_pass_avg = playid_possessionTeam.groupby(by='possessionTeam')['C_pct'].agg(
 team_pass_avg = team_pass_avg.sort_values(by='C_pct', ascending=False)
 
 fig, ax = plt.subplots(figsize=(12,8))
-sns.color_palette(palette='dark', n_colors=len(team_pass_avg))
+sns.color_palette(palette='coolwarm', n_colors=len(team_pass_avg))
 bar = sns.barplot(x='possessionTeam', y='C_pct', data=team_pass_avg)
 bar.set_xticklabels(team_pass_avg['possessionTeam'],rotation=30)
 
@@ -64,7 +64,7 @@ best_form = pd.DataFrame(team_oform.groupby(by=['possessionTeam'])\
                          ['C_pct'].agg('max')).reset_index()
 
 #rename, and merging former DF so know which formations resulted in that max % complete
-best_form.rename({'max':'C_pct'}, axis='columns', inplace=True)
+best_form.rename({'max':'Complete_percentage'}, axis='columns', inplace=True)
 best_form = best_form.merge(team_oform, how='left')
 
 best_form.drop(['I', 'IN', 'S'], axis=1, inplace=True)
