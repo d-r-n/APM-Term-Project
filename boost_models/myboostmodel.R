@@ -1,56 +1,109 @@
-
-
 library(tidyverse)
-source('https://raw.githubusercontent.com/mrcaseb/nflfastR/master/R/helper_add_nflscrapr_mutations.R')
+library(dplyr)
+set.seed(2013)
 
-# starting in 2006 since that's when scrambles started to be marked
-#seasons <- 2006:2019
-seasons <- 2018
+mymodel_vars <- readRDS('Documents/GitHub/APM-Term-Project/boost_models/models/_passResult_model_data.rds')
+str(mymodel_vars)
+mymodel_vars$label <- as.integer(mymodel_vars$label)
+str(mymodel_vars)
 
-##########################################################################################################
-library(readr)
-finaldata <- read_csv("Documents/GitHub/APM-Term-Project/boost_models/data/finaldata.csv", 
-                      col_types = cols(X1 = col_skip()))
-##########################################################################################################
+labels <- mymodel_vars$label
+length(label)
 
-pbp <- purrr::map_df(seasons, function(x) {
-  readRDS(
-    url(
-      glue::glue("https://raw.githubusercontent.com/guga31bb/nflfastR-data/master/data/play_by_play_{x}.rds")
+#install.packages('xgboost')
+library(xgboost)
+full_train = xgboost::xgb.DMatrix(model.matrix(~.+0, data = mymodel_vars %>% dplyr::select(-label)), label = as.integer(mymodel_vars$label))
+
+#params
+nrounds = 20
+
+x = c(7) #max depth
+y = c(.015) #something else to tune
+
+search <- map_df(cross2(x, y), function(x) {
+  
+  depth = x[[1]]
+  eta = x[[2]]
+  
+  print(message(glue::glue('max depth {depth} and eta {eta}')))
+  
+  params <-
+    list(
+      booster = "gbtree",
+      objective = "binary:logistic",
+      eval_metric = c("error", "logloss"),
+      eta = eta,
+      gamma = 2,
+      subsample=0.8,
+      colsample_bytree=0.8,
+      max_depth = 7,
+      min_child_weight = 0.9,
+      base_score = mean(mymodel_vars$label)
     )
-  )
-}) %>%
-  filter(
-    aborted_play == 0, 
-    qb_kneel == 0,
-    rush == 1 | pass == 1, 
-    !is.na(posteam),
-    !is.na(down),
-    !is.na(defteam_timeouts_remaining), 
-    !is.na(posteam_timeouts_remaining),
-    !is.na(yardline_100),
-    !is.na(score_differential),
-    week <= 17
+  
+  #train
+  xp_cv_model <- xgboost::xgb.cv(data = full_train, params = params, nrounds = nrounds,
+                                 nfold = 10, metrics = list("error", "logloss"),
+                                 early_stopping_rounds = 3, print_every_n = 10)
+  
+  iter = xp_cv_model$best_iteration
+  
+  result <- data.frame(
+    'eta' = eta,
+    'iter' = iter,
+    'logloss' = xp_cv_model$evaluation_log[iter]$test_logloss_mean,
+    'error' = xp_cv_model$evaluation_log[iter]$test_error_mean,
+    'gamma' = 2,
+    'max_depth' = 7,
+    'min_child_weight' = 0.9,
+    'subsample' = 0.8,
+    'colsample' = 0.8
   ) %>%
-  make_model_mutations() %>%
-  mutate(label = pass) %>%
-  select(
-    label,
-    # only for CV stuff in model readme in OSF
-    season,
-    down,
-    ydstogo,
-    yardline_100,
-    qtr,
-    wp,
-    vegas_wp,
-    era2, era3, era4,
-    score_differential,
-    home,
-    half_seconds_remaining,
-    posteam_timeouts_remaining,
-    defteam_timeouts_remaining,
-    outdoors, retractable, dome
-  )
+    as_tibble()
+  
+  return(result)
+  
+})
 
-saveRDS(pbp, "models/_dropback_model_data.rds")
+
+search %>%
+  arrange(logloss) 
+
+
+# best
+best <- search %>% 
+  arrange(logloss) %>%
+  dplyr::slice(1)
+
+message(
+  glue::glue("
+  error: {best$error}
+  loglos: {best$logloss}
+  iter: {best$iter}
+  eta: {best$eta}
+  gamma: {best$gamma}
+  depth: {best$max_depth}
+  weight: {best$min_child_weight}
+             ")
+)
+
+error: 0.289332
+loglos: 0.5223975
+iter: 722
+eta: 0.025
+gamma: 2
+depth: 7
+weight: 0.9
+
+
+
+
+
+
+
+
+
+
+
+
+
